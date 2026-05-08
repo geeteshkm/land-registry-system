@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blockchain Land Registry System | Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f9fc;
+      --fg: #111827;
+      --card: #ffffff;
+      --card-fg: #111827;
+      --primary: #4f46e5;
+      --primary-fg: #ffffff;
+      --primary-hover: #4338ca;
+      --muted: #6b7280;
+      --muted-bg: #f3f4f6;
+      --border: #e5e7eb;
+      --input-bg: #f9fafb;
+      --destructive: #ef4444;
+      --radius: 10px;
+      --shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* Background blobs */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .bg-blob-1 {
+      top: 20%; right: 20%;
+      width: 400px; height: 400px;
+      background: rgba(79,70,229,0.07);
+    }
+    .bg-blob-2 {
+      bottom: 25%; left: 25%;
+      width: 320px; height: 320px;
+      background: rgba(99,102,241,0.05);
+    }
+
+    /* Header */
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: rgba(79,70,229,0.1);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 22px; height: 22px; color: var(--primary); }
+    .login-header h1 {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.2;
+    }
+    .login-header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 440px;
+      padding: 40px;
+    }
+    .card-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .card-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 32px; }
+
+    /* Form */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .forgot-link {
+      font-size: 0.75rem;
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: var(--primary-hover); }
+
+    .input-wrap { position: relative; }
+    .form-input {
+      width: 100%;
+      padding: 10px 40px 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--fg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input::placeholder { color: #9ca3af; }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+    .input-icon {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #9ca3af;
+    }
+    .input-icon svg { width: 16px; height: 16px; }
+
+    /* Button */
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary);
+      color: var(--primary-fg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .divider {
+      position: relative;
+      text-align: center;
+      margin: 24px 0;
+    }
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider span {
+      position: relative;
+      background: var(--card);
+      padding: 0 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Signup Row */
+    .signup-row {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .signup-row a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .signup-row a:hover { color: var(--primary-hover); }
+
+    /* Security notice */
+    .security-notice {
+      margin-top: 20px;
+      padding: 12px 14px;
+      background: rgba(79,70,229,0.05);
+      border: 1px solid rgba(79,70,229,0.12);
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    .login-footer {
+      margin-top: 24px;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+
+  <div class="login-header">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
+      </div>
+      <h1>Blockchain Land Registry System</h1>
+    </div>
+    <p>Secure, transparent, and immutable land ownership records</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sign In</div>
+    <div class="card-sub">Access your land registry account</div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <div class="input-wrap">
+          <input class="form-input" id="email" type="email" placeholder="you@example.com" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label class="form-label" for="password">Password</label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <div class="input-wrap">
+          <input class="form-input" id="password" type="password" placeholder="••••••••" required />
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <button class="btn-primary" type="submit" id="submitBtn">Sign In</button>
+    </form>
+
+    <div class="divider"><span>or</span></div>
+
+    <div class="signup-row">
+      <span>New user? </span><a href="register.html">Create account</a>
+    </div>
+
+    <div class="security-notice">
+      🔐 Your credentials are encrypted and stored securely on our blockchain-verified servers.
+    </div>
+  </div>
+
+  <div class="login-footer">© 2024 Blockchain Land Registry. All rights reserved.</div>
+
+  <script>
+    const API = 'http://127.0.0.1:8000';
+    const form = document.getElementById('loginForm');
+    const btn  = document.getElementById('submitBtn');
+
+    // If already logged in, redirect to dashboard
+    if (localStorage.getItem('access_token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Error message element
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'color:#ef4444;font-size:0.82rem;margin-top:10px;text-align:center;';
+    form.appendChild(errorDiv);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.textContent = '';
+
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Signing in...';
+
+      try {
+        // FastAPI login expects form params, not JSON
+        const params = new URLSearchParams();
+        params.append('email',    email);
+        params.append('password', password);
+
+        const res  = await fetch(`${API}/users/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || 'Login failed');
+        }
+
+        // Store auth data in localStorage
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_id',      data.user_id);
+        localStorage.setItem('role',         data.role);
+        localStorage.setItem('full_name',    data.full_name);
+
+        // Redirect based on role
+        const role = data.role.toUpperCase();
+        if (role === 'OWNER') {
+          window.location.href = 'dashboard.html';
+        } else if (role === 'GOVERNMENT') {
+          window.location.href = 'gov_dashboard.html';
+        } else if (role === 'ADMIN') {
+          window.location.href = 'admin_dashboard.html';
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+
+      } catch (err) {
+        errorDiv.textContent = '❌ ' + (err.message || 'Invalid email or password');
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+      }
+    });
+  </script>
+</body>
+</html>

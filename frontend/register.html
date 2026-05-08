@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blockchain Land Registry System | Create Account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f9f9fc;
+      --fg: #111827;
+      --card: #ffffff;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --input-bg: #f9fafb;
+      --destructive: #ef4444;
+      --success: #16a34a;
+      --radius: 10px;
+      --shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .bg-blob-1 {
+      top: 12%;
+      left: 18%;
+      width: 360px;
+      height: 360px;
+      background: rgba(79,70,229,0.07);
+    }
+    .bg-blob-2 {
+      bottom: 18%;
+      right: 18%;
+      width: 320px;
+      height: 320px;
+      background: rgba(99,102,241,0.05);
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 36px;
+    }
+    .head {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .head h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .head p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--fg);
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+    .hint {
+      margin-top: 6px;
+      font-size: 0.73rem;
+      color: var(--muted);
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 6px;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+    .message {
+      margin-top: 14px;
+      font-size: 0.82rem;
+      text-align: center;
+    }
+    .message.error { color: var(--destructive); }
+    .message.success { color: var(--success); }
+    .footer-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .footer-link a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .notice {
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: rgba(79,70,229,0.05);
+      border: 1px solid rgba(79,70,229,0.12);
+      border-radius: var(--radius);
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    @media (max-width: 640px) {
+      .card { padding: 24px 18px; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+
+  <div class="card">
+    <div class="head">
+      <h1>Create Owner Account</h1>
+      <p>Register as a property owner to submit land registration requests.</p>
+    </div>
+
+    <form id="registerForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name</label>
+          <input class="form-input" id="fullName" type="text" placeholder="Your full name" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone</label>
+          <input class="form-input" id="phone" type="text" placeholder="Optional phone number" />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="email">Email Address</label>
+          <input class="form-input" id="email" type="email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" id="password" type="password" placeholder="Create a password" required />
+        </div>
+      </div>
+
+      <button class="btn-primary" type="submit" id="submitBtn">Create Account</button>
+      <div id="message" class="message"></div>
+    </form>
+
+    <div class="footer-link">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+
+    <div class="notice">
+      New public signups are created as <strong>OWNER</strong> accounts only, and a wallet address is generated automatically. Government and admin users should be created by an administrator.
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://127.0.0.1:8000';
+    const form = document.getElementById('registerForm');
+    const btn = document.getElementById('submitBtn');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = '';
+      message.className = 'message';
+
+      const payload = {
+        full_name: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        role: 'OWNER',
+        phone: document.getElementById('phone').value.trim() || null,
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+
+      try {
+        const res = await fetch(`${API}/users/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Registration failed');
+        }
+
+        message.className = 'message success';
+        message.textContent = 'Account created successfully. Redirecting to sign in...';
+        form.reset();
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1200);
+      } catch (err) {
+        message.className = 'message error';
+        message.textContent = '❌ ' + (err.message || 'Registration failed');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

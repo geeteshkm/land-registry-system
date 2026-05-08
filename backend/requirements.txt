@@ -1,0 +1,33 @@
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# Database
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+
+# Passlib 1.7.4 is not compatible with bcrypt>=4.1 on Windows.
+# Pin to a known-good version to avoid runtime hashing errors.
+bcrypt==4.0.1
+
+# Blockchain
+web3==6.15.1
+
+# AI / Fraud Detection
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.4.2
+networkx==3.3
+python-louvain==0.16   # community detection (Louvain)
+
+# Environment
+python-dotenv==1.0.1
+
+# Email validation (Pydantic)
+email-validator==2.1.1

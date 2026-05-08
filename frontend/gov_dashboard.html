@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Government Dashboard | Blockchain Land Registry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f5f9; --fg: #111827; --card: #ffffff;
+      --primary: #059669; --primary-hover: #047857; --primary-fg: #ffffff;
+      --muted: #6b7280; --border: #e5e7eb; --sidebar-bg: #ffffff;
+      --sidebar-width: 240px; --header-height: 64px; --radius: 10px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow: 0 4px 16px rgba(0,0,0,0.06);
+      --destructive: #ef4444;
+    }
+    html, body { height: 100%; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--fg); display: flex; height: 100vh; overflow: hidden; }
+
+    /* SIDEBAR */
+    #sidebar { width: var(--sidebar-width); min-width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 40; position: relative; }
+    #sidebar.collapsed { transform: translateX(calc(-1 * var(--sidebar-width))); position: fixed; }
+    .sidebar-logo { height: var(--header-height); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; padding: 0 20px; flex-shrink: 0; }
+    .sidebar-logo-icon { width: 36px; height: 36px; background: rgba(5,150,105,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sidebar-logo-icon svg { width: 18px; height: 18px; color: var(--primary); }
+    .sidebar-logo-text h2 { font-size: 0.85rem; font-weight: 700; }
+    .sidebar-logo-text p { font-size: 0.7rem; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius); font-size: 0.875rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item:hover { background: rgba(5,150,105,0.07); color: var(--primary); }
+    .nav-item.active { background: rgba(5,150,105,0.1); color: var(--primary); font-weight: 600; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sidebar-footer { border-top: 1px solid var(--border); padding: 12px; }
+    .sidebar-footer .nav-item:hover { color: var(--destructive); background: rgba(239,68,68,0.07); }
+
+    /* MAIN */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    header { height: var(--header-height); background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 12px; flex-shrink: 0; position: relative; }
+    .header-toggle { background: none; border: none; cursor: pointer; padding: 8px; border-radius: 8px; color: var(--fg); transition: background 0.15s; display: flex; align-items: center; justify-content: center; }
+    .header-toggle:hover { background: rgba(5,150,105,0.07); }
+    .header-toggle svg { width: 20px; height: 20px; }
+    .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .user-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.15s; }
+    .user-btn:hover { background: rgba(5,150,105,0.07); }
+    .user-avatar { width: 32px; height: 32px; background: rgba(5,150,105,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-avatar svg { width: 16px; height: 16px; color: var(--primary); }
+    .user-info { text-align: left; }
+    .user-info .user-name { font-size: 0.82rem; font-weight: 600; color: var(--fg); }
+    .user-info .user-role { font-size: 0.7rem; color: var(--muted); }
+
+    /* CONTENT */
+    #content { flex: 1; overflow-y: auto; padding: 32px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .page-title { font-size: 1.6rem; font-weight: 700; }
+    .page-sub { font-size: 0.875rem; color: var(--muted); margin-top: 4px; margin-bottom: 24px; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-change { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+    .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-icon svg { width: 22px; height: 22px; }
+    .icon-green  { background: #f0fdf4; color: #16a34a; }
+    .icon-blue   { background: #eff6ff; color: #2563eb; }
+    .icon-orange { background: #fff7ed; color: #ea580c; }
+    .icon-red    { background: #fef2f2; color: #dc2626; }
+    .icon-purple { background: #f5f3ff; color: #7c3aed; }
+
+    /* CARD */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 20px; }
+    .card-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .card-header h2 { font-size: 1rem; font-weight: 600; }
+    .card-header p { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* REQUEST ITEM */
+    .request-item { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+    .request-item:last-child { border-bottom: none; }
+    .req-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .req-addr { font-size: 0.9rem; font-weight: 600; }
+    .req-meta { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+    .req-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-approve { padding: 7px 16px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .btn-approve:hover { background: #15803d; }
+    .btn-reject  { padding: 7px 16px; background: transparent; color: var(--destructive); border: 1px solid var(--destructive); border-radius: 6px; font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .btn-reject:hover { background: rgba(239,68,68,0.07); }
+    .btn-dispute { padding: 7px 16px; background: #ea580c; color: #fff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .btn-dispute:hover { background: #c2410c; }
+    .btn-resolve { padding: 7px 16px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .btn-resolve:hover { background: #15803d; }
+
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-green  { background: #f0fdf4; color: #16a34a; }
+    .badge-orange { background: #fff7ed; color: #ea580c; }
+    .badge-red    { background: #fef2f2; color: #dc2626; }
+    .badge-blue   { background: #eff6ff; color: #2563eb; }
+    .badge-gray   { background: #f9fafb; color: #6b7280; }
+
+    /* TABLE */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td { padding: 12px 16px; text-align: left; font-size: 0.82rem; border-bottom: 1px solid var(--border); }
+    .data-table th { background: #f9fafb; font-weight: 600; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(5,150,105,0.02); }
+    .mono { font-family: 'DM Mono', monospace; font-size: 0.72rem; }
+
+    /* FRAUD ALERT */
+    .alert-item { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start; }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .alert-icon svg { width: 18px; height: 18px; }
+    .alert-body { flex: 1; }
+    .alert-title { font-size: 0.875rem; font-weight: 600; }
+    .alert-desc  { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+    .alert-meta  { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+    .risk-bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 8px; overflow: hidden; }
+    .risk-fill { height: 100%; border-radius: 2px; }
+
+    /* STATE */
+    .state-box { padding: 32px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+    .spinner-inline { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-msg   { color: var(--destructive); font-size: 0.82rem; }
+    .success-msg { color: #16a34a; font-size: 0.82rem; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--card); border-radius: 16px; padding: 32px; width: 100%; max-width: 440px; margin: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 9px 12px; background: #f9fafb; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.875rem; font-family: inherit; color: var(--fg); outline: none; }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); }
+    .btn-danger { background: var(--destructive); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 30; }
+    #overlay.show { display: block; }
+    @media (max-width: 768px) { #content { padding: 20px 16px; } #sidebar { position: fixed; } }
+  </style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="sidebar-logo-text"><h2>BLRS — Gov</h2><p>Government Portal</p></div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="switchSection('overview',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
+    </button>
+    <button class="nav-item" onclick="switchSection('requests',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Pending Requests
+      <span id="reqBadge" style="margin-left:auto;background:#ef4444;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;display:none"></span>
+    </button>
+    <button class="nav-item" onclick="switchSection('properties',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>All Properties
+    </button>
+    <button class="nav-item" onclick="switchSection('transactions',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>Transactions
+    </button>
+    <button class="nav-item" onclick="switchSection('disputes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Disputes
+    </button>
+    <button class="nav-item" onclick="switchSection('fraud',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Fraud Alerts
+    </button>
+    <button class="nav-item" onclick="switchSection('blockchain',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>Blockchain Stats
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="nav-item" onclick="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <header>
+    <button class="header-toggle" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="header-right">
+      <div class="user-btn">
+        <div class="user-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="headerName">Loading…</div>
+          <div class="user-role">Government Authority</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="content">
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="sec-overview">
+      <div class="page-title">Government Dashboard</div>
+      <div class="page-sub">Manage land registry, approve requests, and monitor fraud.</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div><div class="stat-label">Pending Requests</div><div class="stat-value" id="statPending">—</div><div class="stat-change">Awaiting approval</div></div>
+          <div class="stat-icon icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        </div>
+        <div class="stat-card">
+          <div><div class="stat-label">Total Properties</div><div class="stat-value" id="statProps">—</div><div class="stat-change">Registered on chain</div></div>
+          <div class="stat-icon icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        </div>
+        <div class="stat-card">
+          <div><div class="stat-label">Total Transactions</div><div class="stat-value" id="statTxns">—</div><div class="stat-change">All time</div></div>
+          <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </div>
+        <div class="stat-card">
+          <div><div class="stat-label">Fraud Alerts</div><div class="stat-value" id="statFraud">—</div><div class="stat-change">Unresolved</div></div>
+          <div class="stat-icon icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        </div>
+        <div class="stat-card">
+          <div><div class="stat-label">Disputed Properties</div><div class="stat-value" id="statDisputed">—</div><div class="stat-change">Under review</div></div>
+          <div class="stat-icon icon-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        </div>
+      </div>
+
+      <!-- Recent Pending Requests -->
+      <div class="card">
+        <div class="card-header">
+          <div><h2>Recent Pending Requests</h2><p>Requires your action</p></div>
+          <button class="btn btn-primary" onclick="switchSection('requests',document.querySelectorAll('.nav-item')[1])" style="font-size:0.8rem;padding:7px 14px;">View All</button>
+        </div>
+        <div id="overviewRequests"><div class="state-box"><div class="spinner-inline"></div></div></div>
+      </div>
+    </div>
+
+    <!-- PENDING REQUESTS -->
+    <div class="section" id="sec-requests">
+      <div class="page-title">Pending Property Requests</div>
+      <div class="page-sub">Review and approve or reject owner property registration requests.</div>
+      <div class="card">
+        <div class="card-header"><h2>All Pending Requests</h2><p id="reqCountSub">Loading…</p></div>
+        <div id="requestsList"><div class="state-box"><div class="spinner-inline"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ALL PROPERTIES -->
+    <div class="section" id="sec-properties">
+      <div class="page-title">All Properties</div>
+      <div class="page-sub">View and manage all registered properties.</div>
+      <div class="card">
+        <div class="card-header"><h2>Property Registry</h2><p id="propCountSub">Loading…</p></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Reg No</th><th>Address</th><th>Type</th><th>Area</th><th>Price</th><th>Owner</th><th>Status</th><th>On Chain</th><th>Actions</th></tr></thead>
+            <tbody id="propertiesTable"><tr><td colspan="9" class="state-box"><div class="spinner-inline"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="section" id="sec-transactions">
+      <div class="page-title">All Transactions</div>
+      <div class="page-sub">Complete blockchain transaction history.</div>
+      <div class="card">
+        <div class="card-header"><h2>Transaction History</h2><p id="txnCountSub">Loading…</p></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Property</th><th>From</th><th>To</th><th>Amount</th><th>Type</th><th>On Chain</th><th>Time</th></tr></thead>
+            <tbody id="txnTable"><tr><td colspan="8" class="state-box"><div class="spinner-inline"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPUTES -->
+    <div class="section" id="sec-disputes">
+      <div class="page-title">Property Disputes</div>
+      <div class="page-sub">Raise or resolve disputes on properties.</div>
+
+      <!-- Raise Dispute -->
+      <div class="card">
+        <div class="card-header"><h2>Raise Dispute</h2><p>Flag a property as disputed on the blockchain</p></div>
+        <div style="padding:24px;">
+          <div class="form-group">
+            <label class="form-label">Property ID</label>
+            <input class="form-input" type="number" id="disputePropertyId" placeholder="Enter property ID" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason</label>
+            <input class="form-input" type="text" id="disputeReason" placeholder="Reason for dispute" />
+          </div>
+          <div id="disputeMsg" style="margin-top:8px;font-size:0.82rem;"></div>
+          <button class="btn-dispute" style="margin-top:16px;" onclick="submitDispute()">Raise Dispute</button>
+        </div>
+      </div>
+
+      <!-- Resolve Dispute -->
+      <div class="card">
+        <div class="card-header"><h2>Resolve Dispute</h2><p>Mark a disputed property as resolved</p></div>
+        <div style="padding:24px;">
+          <div class="form-group">
+            <label class="form-label">Property ID</label>
+            <input class="form-input" type="number" id="resolvePropertyId" placeholder="Enter property ID" />
+          </div>
+          <div id="resolveMsg" style="margin-top:8px;font-size:0.82rem;"></div>
+          <button class="btn-resolve" style="margin-top:16px;" onclick="submitResolve()">Resolve Dispute</button>
+        </div>
+      </div>
+
+      <!-- Disputed Properties List -->
+      <div class="card">
+        <div class="card-header"><h2>Currently Disputed Properties</h2></div>
+        <div id="disputedList"><div class="state-box"><div class="spinner-inline"></div></div></div>
+      </div>
+    </div>
+
+    <!-- FRAUD ALERTS -->
+    <div class="section" id="sec-fraud">
+      <div class="page-title">Fraud Detection</div>
+      <div class="page-sub">AI-powered fraud analysis — DBSCAN + Louvain + 4 extra signals.</div>
+
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="runFraudAnalysis()" id="fraudAnalyzeBtn">🔍 Run Full Analysis</button>
+        <button class="btn btn-ghost"   onclick="loadFraudAlerts()">↻ Refresh Alerts</button>
+      </div>
+
+      <div id="fraudSummary"></div>
+
+      <div class="card">
+        <div class="card-header"><h2>Unresolved Fraud Alerts</h2><p id="fraudCountSub">Loading…</p></div>
+        <div id="fraudAlertsList"><div class="state-box"><div class="spinner-inline"></div></div></div>
+      </div>
+    </div>
+
+    <!-- BLOCKCHAIN STATS -->
+    <div class="section" id="sec-blockchain">
+      <div class="page-title">Blockchain Stats</div>
+      <div class="page-sub">Live data directly from the smart contract on Sepolia.</div>
+      <div id="chainStats"><div class="state-box"><div class="spinner-inline"></div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REJECT MODAL -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal">
+    <h3>Reject Request</h3>
+    <div class="form-group">
+      <label class="form-label">Reason for rejection</label>
+      <input class="form-input" type="text" id="rejectReason" placeholder="Enter reason" />
+    </div>
+    <div id="rejectMsg" style="font-size:0.82rem;margin-top:6px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost"  onclick="closeModal('rejectModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmReject()">Reject</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API      = 'http://127.0.0.1:8000';
+const token    = localStorage.getItem('access_token');
+const userId   = localStorage.getItem('user_id');
+const fullName = localStorage.getItem('full_name');
+const role     = localStorage.getItem('role');
+
+if (!token || role !== 'GOVERNMENT') {
+  alert('Access denied. Government login required.');
+  window.location.href = 'login.html';
+}
+
+document.getElementById('headerName').textContent = fullName || 'Government';
+
+async function apiFetch(url, options = {}) {
+  const res = await fetch(`${API}${url}`, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(options.headers||{}) },
+  });
+  if (res.status === 401) { logout(); throw new Error('Session expired'); }
+  return res;
+}
+
+// ── STATUS BADGE ──
+function statusBadge(status) {
+  const s = (status||'').toUpperCase();
+  if (s === 'REGISTERED' || s === 'APPROVED') return `<span class="badge badge-green">✅ ${status}</span>`;
+  if (s === 'PENDING')  return `<span class="badge badge-orange">⏳ Pending</span>`;
+  if (s === 'DISPUTED') return `<span class="badge badge-red">⚠️ Disputed</span>`;
+  if (s === 'RESOLVED') return `<span class="badge badge-blue">✔ Resolved</span>`;
+  if (s === 'REJECTED') return `<span class="badge badge-red">❌ Rejected</span>`;
+  return `<span class="badge badge-gray">${status}</span>`;
+}
+
+// ── LOAD OVERVIEW ──
+async function loadOverview() {
+  try {
+    const [reqRes, propRes, txnRes, fraudRes] = await Promise.all([
+      apiFetch('/government/pending-requests'),
+      apiFetch('/properties'),
+      apiFetch('/transactions'),
+      apiFetch('/fraud/alerts'),
+    ]);
+    const requests    = await reqRes.json();
+    const properties  = await propRes.json();
+    const txns        = await txnRes.json();
+    const fraudAlerts = await fraudRes.json();
+
+    const disputed = properties.filter(p => p.status === 'DISPUTED').length;
+
+    document.getElementById('statPending').textContent  = requests.length;
+    document.getElementById('statProps').textContent    = properties.length;
+    document.getElementById('statTxns').textContent     = txns.length;
+    document.getElementById('statFraud').textContent    = fraudAlerts.length;
+    document.getElementById('statDisputed').textContent = disputed;
+
+    // Badge on sidebar
+    if (requests.length > 0) {
+      const badge = document.getElementById('reqBadge');
+      badge.textContent = requests.length;
+      badge.style.display = 'inline';
+    }
+
+    // Overview requests (first 3)
+    const el = document.getElementById('overviewRequests');
+    if (!requests.length) {
+      el.innerHTML = `<div class="state-box"><p>No pending requests. All caught up! ✅</p></div>`;
+    } else {
+      el.innerHTML = requests.slice(0,3).map(r => renderRequestItem(r)).join('');
+    }
+
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+// ── RENDER REQUEST ITEM ──
+function renderRequestItem(r) {
+  return `<div class="request-item">
+    <div class="req-top">
+      <div>
+        <div class="req-addr">${r.address}</div>
+        <div class="req-meta">${r.property_type} · ${r.area_sqft} sq ft · ₹${Number(r.price).toLocaleString('en-IN')}</div>
+        <div class="req-meta">Owner ID: ${r.owner_id} · Submitted: ${r.created_at?r.created_at.split('T')[0]:'—'}</div>
+      </div>
+      ${statusBadge(r.status)}
+    </div>
+    ${r.status === 'PENDING' ? `
+    <div class="req-actions">
+      <button class="btn-approve" onclick="approveRequest(${r.request_id})">✅ Approve</button>
+      <button class="btn-reject"  onclick="openReject(${r.request_id})">❌ Reject</button>
+    </div>` : ''}
+  </div>`;
+}
+
+// ── LOAD REQUESTS ──
+async function loadRequests() {
+  const el  = document.getElementById('requestsList');
+  const sub = document.getElementById('reqCountSub');
+  el.innerHTML = `<div class="state-box"><div class="spinner-inline"></div></div>`;
+  try {
+    const res  = await apiFetch('/government/pending-requests');
+    const list = await res.json();
+    sub.textContent = `${list.length} pending requests`;
+    el.innerHTML = list.length
+      ? list.map(r => renderRequestItem(r)).join('')
+      : `<div class="state-box"><p>No pending requests.</p></div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="state-box error-msg">Failed to load requests.</div>`;
+  }
+}
+
+// ── APPROVE REQUEST ──
+let approveTimeout = null;
+async function approveRequest(requestId) {
+  try {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Approving…';
+    const res  = await apiFetch(`/government/approve/${requestId}`, { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Approval failed');
+    alert(`✅ Property approved!\nReg No: ${data.reg_number}\nOn Chain: ${data.on_chain ? 'Yes' : 'No (blockchain error)'}`);
+    await loadOverview();
+    await loadRequests();
+  } catch(e) {
+    alert('❌ ' + e.message);
+  }
+}
+
+// ── REJECT REQUEST ──
+let rejectRequestId = null;
+function openReject(requestId) {
+  rejectRequestId = requestId;
+  document.getElementById('rejectReason').value = '';
+  document.getElementById('rejectMsg').textContent = '';
+  document.getElementById('rejectModal').classList.add('open');
+}
+async function confirmReject() {
+  const reason = document.getElementById('rejectReason').value.trim();
+  if (!reason) { document.getElementById('rejectMsg').innerHTML = `<span class="error-msg">Please enter a reason.</span>`; return; }
+  try {
+    const res  = await apiFetch(`/government/reject/${rejectRequestId}`, {
+      method: 'POST',
+      body: JSON.stringify({ request_id: rejectRequestId, reason }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Rejection failed');
+    closeModal('rejectModal');
+    await loadOverview();
+    await loadRequests();
+  } catch(e) {
+    document.getElementById('rejectMsg').innerHTML = `<span class="error-msg">❌ ${e.message}</span>`;
+  }
+}
+
+// ── LOAD PROPERTIES ──
+async function loadProperties() {
+  const el  = document.getElementById('propertiesTable');
+  const sub = document.getElementById('propCountSub');
+  el.innerHTML = `<tr><td colspan="9" class="state-box"><div class="spinner-inline"></div></td></tr>`;
+  try {
+    const res  = await apiFetch('/properties');
+    const list = await res.json();
+    sub.textContent = `${list.length} total properties`;
+    if (!list.length) { el.innerHTML = `<tr><td colspan="9" class="state-box">No properties found.</td></tr>`; return; }
+    el.innerHTML = list.map(p => `<tr>
+      <td><span class="mono">${p.registration_number||'—'}</span></td>
+      <td style="max-width:200px;font-size:0.78rem">${p.address}</td>
+      <td>${p.property_type}</td>
+      <td>${p.area_sqft} sqft</td>
+      <td>₹${Number(p.price).toLocaleString('en-IN')}</td>
+      <td>ID: ${p.current_owner_id}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td>${p.is_on_chain ? '✅' : '❌'}</td>
+      <td>
+        ${p.status !== 'DISPUTED' ? `<button class="btn-dispute" style="font-size:0.72rem;padding:4px 10px;" onclick="quickDispute(${p.property_id})">Dispute</button>` : `<button class="btn-resolve" style="font-size:0.72rem;padding:4px 10px;" onclick="quickResolve(${p.property_id})">Resolve</button>`}
+      </td>
+    </tr>`).join('');
+
+    // Also load disputed list
+    const disputed = list.filter(p => p.status === 'DISPUTED');
+    const dispEl = document.getElementById('disputedList');
+    dispEl.innerHTML = disputed.length
+      ? disputed.map(p => `<div class="request-item">
+          <div class="req-top">
+            <div><div class="req-addr">${p.address}</div><div class="req-meta">${p.registration_number} · ${p.property_type}</div></div>
+            ${statusBadge(p.status)}
+          </div>
+          <div class="req-actions">
+            <button class="btn-resolve" onclick="quickResolve(${p.property_id})">✔ Resolve Dispute</button>
+          </div>
+        </div>`).join('')
+      : `<div class="state-box"><p>No disputed properties.</p></div>`;
+
+  } catch(e) {
+    el.innerHTML = `<tr><td colspan="9" class="state-box error-msg">Failed to load properties.</td></tr>`;
+  }
+}
+
+// ── LOAD TRANSACTIONS ──
+async function loadTransactions() {
+  const el  = document.getElementById('txnTable');
+  const sub = document.getElementById('txnCountSub');
+  el.innerHTML = `<tr><td colspan="8" class="state-box"><div class="spinner-inline"></div></td></tr>`;
+  try {
+    const res  = await apiFetch('/transactions');
+    const list = await res.json();
+    sub.textContent = `${list.length} transactions`;
+    if (!list.length) { el.innerHTML = `<tr><td colspan="8" class="state-box">No transactions found.</td></tr>`; return; }
+    el.innerHTML = list.map(t => `<tr>
+      <td>${t.transaction_id}</td>
+      <td style="font-size:0.78rem;max-width:150px">${t.property||'—'}</td>
+      <td style="font-size:0.78rem">${t.from_user||t.sender_id}</td>
+      <td style="font-size:0.78rem">${t.to_user||t.receiver_id}</td>
+      <td>₹${Number(t.amount||0).toLocaleString('en-IN')}</td>
+      <td>${t.transaction_type||'—'}</td>
+      <td>${t.is_on_chain?'✅':'❌'}</td>
+      <td style="font-size:0.72rem">${t.time?new Date(t.time).toLocaleString():'—'}</td>
+    </tr>`).join('');
+  } catch(e) {
+    el.innerHTML = `<tr><td colspan="8" class="state-box error-msg">Failed to load transactions.</td></tr>`;
+  }
+}
+
+// ── DISPUTES ──
+async function submitDispute() {
+  const propId = document.getElementById('disputePropertyId').value;
+  const reason = document.getElementById('disputeReason').value.trim();
+  const msgEl  = document.getElementById('disputeMsg');
+  if (!propId || !reason) { msgEl.innerHTML = `<span class="error-msg">Please fill in all fields.</span>`; return; }
+  try {
+    const res  = await apiFetch('/properties/dispute', {
+      method: 'POST',
+      body: JSON.stringify({ property_id: parseInt(propId), reason }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Failed');
+    msgEl.innerHTML = `<span class="success-msg">✅ Dispute raised! ${data.on_chain ? 'Recorded on blockchain.' : 'Recorded in DB.'}</span>`;
+    document.getElementById('disputePropertyId').value = '';
+    document.getElementById('disputeReason').value = '';
+    await loadProperties();
+  } catch(e) {
+    msgEl.innerHTML = `<span class="error-msg">❌ ${e.message}</span>`;
+  }
+}
+
+async function submitResolve() {
+  const propId = document.getElementById('resolvePropertyId').value;
+  const msgEl  = document.getElementById('resolveMsg');
+  if (!propId) { msgEl.innerHTML = `<span class="error-msg">Please enter a property ID.</span>`; return; }
+  try {
+    const res  = await apiFetch('/properties/resolve-dispute', {
+      method: 'POST',
+      body: JSON.stringify({ property_id: parseInt(propId) }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Failed');
+    msgEl.innerHTML = `<span class="success-msg">✅ Dispute resolved!</span>`;
+    document.getElementById('resolvePropertyId').value = '';
+    await loadProperties();
+  } catch(e) {
+    msgEl.innerHTML = `<span class="error-msg">❌ ${e.message}</span>`;
+  }
+}
+
+async function quickDispute(propId) {
+  const reason = prompt('Enter reason for dispute:');
+  if (!reason) return;
+  try {
+    const res = await apiFetch('/properties/dispute', { method:'POST', body: JSON.stringify({ property_id: propId, reason }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail);
+    alert('✅ Dispute raised!');
+    await loadProperties();
+  } catch(e) { alert('❌ ' + e.message); }
+}
+
+async function quickResolve(propId) {
+  try {
+    const res = await apiFetch('/properties/resolve-dispute', { method:'POST', body: JSON.stringify({ property_id: propId }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail);
+    alert('✅ Dispute resolved!');
+    await loadProperties();
+  } catch(e) { alert('❌ ' + e.message); }
+}
+
+// ── FRAUD ANALYSIS ──
+async function runFraudAnalysis() {
+  const btn = document.getElementById('fraudAnalyzeBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyzing…';
+  document.getElementById('fraudSummary').innerHTML = `<div class="state-box"><div class="spinner-inline"></div> Running AI fraud detection…</div>`;
+  try {
+    const res  = await apiFetch('/fraud/analyze');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Analysis failed');
+    const s = data.summary || {};
+    document.getElementById('fraudSummary').innerHTML = `
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card"><div><div class="stat-label">Amount Anomalies</div><div class="stat-value">${s.amount_anomalies||0}</div><div class="stat-change">DBSCAN outliers</div></div><div class="stat-icon icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+        <div class="stat-card"><div><div class="stat-label">Circular Ownership</div><div class="stat-value">${s.circular_ownership||0}</div><div class="stat-change">Louvain communities</div></div><div class="stat-icon icon-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div>
+        <div class="stat-card"><div><div class="stat-label">Rapid Transfers</div><div class="stat-value">${s.rapid_transfers||0}</div><div class="stat-change">Within 7 days</div></div><div class="stat-icon icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+        <div class="stat-card"><div><div class="stat-label">Price Manipulation</div><div class="stat-value">${s.price_manipulations||0}</div><div class="stat-change">200%+ price change</div></div><div class="stat-icon icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div></div>
+        <div class="stat-card"><div><div class="stat-label">Self Dealing</div><div class="stat-value">${s.self_dealing||0}</div><div class="stat-change">Shell accounts</div></div><div class="stat-icon icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
+        <div class="stat-card"><div><div class="stat-label">High Freq Pairs</div><div class="stat-value">${s.high_freq_pairs||0}</div><div class="stat-change">Repeat transactions</div></div><div class="stat-icon icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
+      </div>`;
+    await loadFraudAlerts();
+  } catch(e) {
+    document.getElementById('fraudSummary').innerHTML = `<div class="state-box error-msg">❌ ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Run Full Analysis';
+  }
+}
+
+async function loadFraudAlerts() {
+  const el  = document.getElementById('fraudAlertsList');
+  const sub = document.getElementById('fraudCountSub');
+  el.innerHTML = `<div class="state-box"><div class="spinner-inline"></div></div>`;
+  try {
+    const res  = await apiFetch('/fraud/alerts');
+    const list = await res.json();
+    document.getElementById('statFraud').textContent = list.length;
+    sub.textContent = `${list.length} unresolved alerts`;
+    if (!list.length) { el.innerHTML = `<div class="state-box"><p>No unresolved fraud alerts. ✅</p></div>`; return; }
+    el.innerHTML = list.map(a => {
+      const riskColor = a.risk_score >= 80 ? '#ef4444' : a.risk_score >= 60 ? '#ea580c' : '#eab308';
+      return `<div class="alert-item">
+        <div class="alert-icon" style="background:${riskColor}22;color:${riskColor}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="alert-body">
+          <div class="alert-title">${a.fraud_type.replace(/_/g,' ')}</div>
+          <div class="alert-desc">${a.description || '—'}</div>
+          <div class="alert-meta">Risk Score: <strong style="color:${riskColor}">${a.risk_score}</strong> · Alert #${a.alert_id} · ${a.created_at?a.created_at.split('T')[0]:'—'}</div>
+          <div class="risk-bar"><div class="risk-fill" style="width:${a.risk_score}%;background:${riskColor}"></div></div>
+        </div>
+        <button class="btn-resolve" style="font-size:0.72rem;padding:5px 10px;flex-shrink:0;align-self:center;" onclick="resolveAlert(${a.alert_id}, this)">Resolve</button>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="state-box error-msg">Failed to load alerts.</div>`;
+  }
+}
+
+async function resolveAlert(alertId, btn) {
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const res = await apiFetch(`/fraud/alerts/${alertId}/resolve`, { method: 'PUT' });
+    if (!res.ok) throw new Error('Failed');
+    await loadFraudAlerts();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Resolve';
+    alert('❌ ' + e.message);
+  }
+}
+
+// ── BLOCKCHAIN STATS ──
+async function loadChainStats() {
+  const el = document.getElementById('chainStats');
+  try {
+    const [statsRes, recordsRes] = await Promise.all([
+      apiFetch('/blockchain/stats'),
+      apiFetch('/blockchain/records'),
+    ]);
+    const data = await statsRes.json();
+    const recordsData = await recordsRes.json();
+    if (!statsRes.ok) throw new Error(data.detail || 'Failed');
+    if (!recordsRes.ok) throw new Error(recordsData.detail || 'Failed to load records');
+    const records = recordsData.records || [];
+    const limitations = recordsData.limitations || [];
+    const recordMarkup = records.length ? records.map(r => `
+      <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:#fff;">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+          <div>
+            <div style="font-size:0.95rem;font-weight:700;">Property #${r.property_id} · ${r.registration_number || '—'}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">${r.address}</div>
+          </div>
+          <span class="badge ${r.chain_available ? 'badge-green' : 'badge-orange'}">${r.chain_available ? 'Verified on chain' : 'DB marked only'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;">
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Contract</div><div class="mono">${r.contract_address || '—'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">DB Tx Hash</div><div class="mono">${r.db_blockchain_tx_hash || '—'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Current Owner Wallet</div><div class="mono">${r.chain_current_owner || r.db_owner_wallet || '—'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Registered At</div><div>${r.chain_created_at || '—'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Updated At</div><div>${r.chain_updated_at || '—'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Current State Hash</div><div class="mono">${r.current_state_hash || '—'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Previous State Hash</div><div class="mono">${r.previous_state_hash || 'Not stored'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Block Fingerprint</div><div class="mono">${r.block_fingerprint || 'Not available on current deployment'}</div></div>
+          <div style="padding:10px 12px;background:#f9fafb;border-radius:8px;"><div style="font-size:0.72rem;color:var(--muted);">Chain Timeline</div><div>${(r.timeline || []).length} entries</div></div>
+        </div>
+        <div style="margin-top:10px;font-size:0.74rem;color:var(--muted);">${r.previous_state_hash_note || ''}</div>
+        ${(r.timeline || []).length ? `
+          <div style="margin-top:12px;overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Tx Type</th><th>From</th><th>To</th><th>Price</th><th>Timestamp</th></tr></thead>
+              <tbody>
+                ${(r.timeline || []).map(t => `
+                  <tr>
+                    <td>${t.tx_type || '—'}</td>
+                    <td class="mono">${t.from || '—'}</td>
+                    <td class="mono">${t.to || '—'}</td>
+                    <td>₹${Number(t.price || 0).toLocaleString('en-IN')}</td>
+                    <td>${t.readable_time || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>` : ''}
+        ${(r.audit_trail || []).length ? `
+          <div style="margin-top:12px;overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Action</th><th>Tx Index</th><th>Current Hash</th><th>Previous Hash</th><th>Fingerprint</th><th>Actor</th><th>Timestamp</th></tr></thead>
+              <tbody>
+                ${(r.audit_trail || []).map(a => `
+                  <tr>
+                    <td>${a.action || '—'}</td>
+                    <td>${a.transaction_index ?? '—'}</td>
+                    <td class="mono">${a.current_data_hash || '—'}</td>
+                    <td class="mono">${a.previous_data_hash || '—'}</td>
+                    <td class="mono">${a.block_fingerprint || '—'}</td>
+                    <td class="mono">${a.actor || '—'}</td>
+                    <td>${a.readable_time || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>` : ''}
+        ${r.chain_error ? `<div style="margin-top:10px;font-size:0.74rem;color:#dc2626;">Chain read issue: ${r.chain_error}</div>` : ''}
+      </div>`).join('') : `<div class="state-box">No detailed on-chain records available yet.</div>`;
+    el.innerHTML = `
+      <div style="padding:14px 18px;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;margin-bottom:20px;font-size:0.82rem;color:#92400e;">
+        ℹ️ <strong>Note:</strong> Blockchain only shows properties registered via this system after deployment. Seeded test data is DB-only.
+        ${data.chain?.error ? `<br>⚠️ Chain error: ${data.chain.error}` : ''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><h2>🔗 Live Blockchain (Sepolia)</h2></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:8px;">
+              <span style="font-size:0.82rem;color:var(--muted);">Properties on Chain</span>
+              <span style="font-size:1.2rem;font-weight:700;color:#16a34a">${data.chain?.total_properties ?? '—'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#eff6ff;border-radius:8px;">
+              <span style="font-size:0.82rem;color:var(--muted);">Transactions on Chain</span>
+              <span style="font-size:1.2rem;font-weight:700;color:#2563eb">${data.chain?.total_transactions ?? '—'}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>🗄️ Database Records</h2></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:8px;">
+              <span style="font-size:0.82rem;color:var(--muted);">Total Properties</span>
+              <span style="font-size:1.2rem;font-weight:700;color:#16a34a">${data.database?.total_properties ?? '—'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#eff6ff;border-radius:8px;">
+              <span style="font-size:0.82rem;color:var(--muted);">Marked On-Chain</span>
+              <span style="font-size:1.2rem;font-weight:700;color:#2563eb">${data.database?.on_chain_properties ?? '—'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fff7ed;border-radius:8px;">
+              <span style="font-size:0.82rem;color:var(--muted);">DB Only</span>
+              <span style="font-size:1.2rem;font-weight:700;color:#ea580c">${data.database?.off_chain_properties ?? '—'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Contract Details</h2></div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f9fafb;border-radius:8px;">
+            <span style="font-size:0.8rem;color:var(--muted);font-weight:500;">Contract Address</span>
+            <span class="mono">${data.contract_address}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f9fafb;border-radius:8px;">
+            <span style="font-size:0.8rem;color:var(--muted);font-weight:500;">Government Wallet</span>
+            <span class="mono">${data.government_address}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f9fafb;border-radius:8px;">
+            <span style="font-size:0.8rem;color:var(--muted);font-weight:500;">Backend Signer</span>
+            <span class="mono">${data.signer_address || '—'}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f9fafb;border-radius:8px;">
+            <span style="font-size:0.8rem;color:var(--muted);font-weight:500;">Network</span>
+            <span style="font-weight:600;">Sepolia Testnet</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><h2>Detailed On-Chain Records</h2><p>Evidence view for records currently reachable from the deployed contract</p></div></div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+          ${limitations.length ? `<div style="padding:12px 14px;background:#f9fafb;border-radius:10px;font-size:0.78rem;color:var(--muted);">${limitations.join('<br>')}</div>` : ''}
+          ${recordMarkup}
+        </div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="state-box error-msg">Failed to load blockchain stats: ${e.message}</div>`;
+  }
+}
+
+// ── MODAL ──
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('open'); });
+
+// ── LOGOUT ──
+function logout() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('role');
+  localStorage.removeItem('full_name');
+  window.location.href = 'login.html';
+}
+
+// ── SIDEBAR ──
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+  if (window.innerWidth < 768) document.getElementById('overlay').classList.toggle('show', sidebarOpen);
+}
+function closeSidebar() {
+  sidebarOpen = false;
+  document.getElementById('sidebar').classList.add('collapsed');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── SECTION SWITCH ──
+function switchSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('sec-' + name);
+  if (sec) sec.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'requests')     loadRequests();
+  if (name === 'properties')   loadProperties();
+  if (name === 'transactions') loadTransactions();
+  if (name === 'fraud')        loadFraudAlerts();
+  if (name === 'blockchain')   loadChainStats();
+  if (name === 'disputes')     loadProperties();
+  if (window.innerWidth < 768) closeSidebar();
+}
+
+// ── INIT ──
+loadOverview();
+</script>
+</body>
+</html>
