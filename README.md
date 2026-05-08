@@ -452,10 +452,10 @@ MIT License - Feel free to use this project for educational and personal purpose
 
 ## 👤 Author
 
-**Your Name**
-- GitHub: [@your-username](https://github.com/your-username)
-- Email: your.email@example.com
-- LinkedIn: [Your Profile](https://linkedin.com/in/your-profile)
+**Geetesh**
+- GitHub: [@xyzgee](https://github.com/xyzgee)
+- Email: geeteshkm25@gmail.com
+- LinkedIn: [Geetesh M](https://www.linkedin.com/in/geetesh-muralitharan-060a752b0/)
 
 ---
 
