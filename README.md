@@ -25,7 +25,7 @@ A secure land property registry with blockchain verification and AI-powered frau
 ## 📋 Prerequisites
 
 - **Python**: 3.11 or higher
-- **Node.js**: 20.x LTS or 22.13+ (for Hardhat)
+- **Node.js**: 22.13+ (for Hardhat compatibility)
 - **npm**: 9+
 - **PostgreSQL**: 12 or higher
 - **Git**: For version control
@@ -452,10 +452,12 @@ MIT License - Feel free to use this project for educational and personal purpose
 
 ## 👤 Author
 
-**Geetesh**
+**Geetesh Muralitharan & Giricharan BV**
 - GitHub: [@xyzgee](https://github.com/xyzgee)
-- Email: geeteshkm25@gmail.com
+- Email [Geetesh]: geeteshkm25@gmail.com
+- Email [Giricharan]: giribv1612@gmail.com
 - LinkedIn: [Geetesh M](https://www.linkedin.com/in/geetesh-muralitharan-060a752b0/)
+- LinkedIn: [Giricharan BV](https://www.linkedin.com/in/giri-charan-8001282a0/)
 
 ---
 
