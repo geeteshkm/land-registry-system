@@ -269,7 +269,7 @@ Run analysis: Login as Admin/Government → Fraud Detection → Run Full Analysi
 
 **Error**: `ModuleNotFoundError: No module named 'backend'`
 - **Fix**: Ensure you run `uvicorn` from project root, not from `backend/` folder
-- Run from: `d:\Geetesh\Final-year Project\land-registry-system\`
+- Run from: `the root folder of the project (land-registry-system/)`
 
 **Error**: `psycopg2.OperationalError: could not connect to server`
 - **Fix**: PostgreSQL is not running or credentials are wrong
