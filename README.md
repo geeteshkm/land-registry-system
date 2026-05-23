@@ -375,19 +375,17 @@ This will gracefully shut down:
 ```
 # Database
 DB_USER=postgres
-DB_PASSWORD=2528
+DB_PASSWORD=your_db_password_here
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=land_registry_db
-DATABASE_URL=postgresql://postgres:2528@localhost:5432/land_registry_db
+DATABASE_URL=postgresql://postgres:your_db_password_here@localhost:5432/land_registry_db
 
-# Blockchain
 SEPOLIA_RPC_URL=http://127.0.0.1:8545
-CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
-PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+CONTRACT_ADDRESS=your_deployed_contract_address
+PRIVATE_KEY=your_hardhat_private_key_here
 
-# JWT Auth
-SECRET_KEY=supersecretkey123
+SECRET_KEY=your_secret_key_here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 TOKEN_EXPIRE_HOURS=12
