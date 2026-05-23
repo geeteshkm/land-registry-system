@@ -14,9 +14,9 @@ A secure land property registry with blockchain verification and AI-powered frau
 
 ## 🎬 Demo Video
 
-[![Blockchain Land Registry System - Demo](https://img.youtube.com/vi/WGmEMDrE1VI&t=212s/0.jpg)](https://www.youtube.com/watch?v=WGmEMDrE1VI&t=212s)
+▶️ **[AI-Enhanced Fraud Detection in Real Estate using Blockchain | Final Year Project Demo](https://www.youtube.com/watch?v=WGmEMDrE1VI&t=212s)**
 
-> Click the thumbnail above to watch the full project demo on YouTube.
+> The demo covers user registration, property listing, ownership transfer, and live AI fraud detection analysis.
 
 ## 🛠️ Tech Stack
 
