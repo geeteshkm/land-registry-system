@@ -12,6 +12,12 @@ A secure land property registry with blockchain verification and AI-powered frau
 - **JWT Authentication**: Secure token-based user authentication
 - **Admin Dashboard**: Comprehensive fraud analysis and system management
 
+## 🎬 Demo Video
+
+[![Blockchain Land Registry System - Demo](https://img.youtube.com/vi/WGmEMDrE1VI&t=212s/0.jpg)](https://www.youtube.com/watch?v=WGmEMDrE1VI&t=212s)
+
+> Click the thumbnail above to watch the full project demo on YouTube.
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
