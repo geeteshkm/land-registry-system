@@ -453,10 +453,10 @@ MIT License - Feel free to use this project for educational and personal purpose
 ## 👤 Author
 
 **Geetesh Muralitharan & Giricharan BV**
-- GitHub: [@xyzgee](https://github.com/xyzgee)
+- GitHub: [@geeteshkm](https://github.com/geeteshkm)
 - Email [Geetesh]: geeteshkm25@gmail.com
 - Email [Giricharan]: giribv1612@gmail.com
-- LinkedIn: [Geetesh M](https://www.linkedin.com/in/geetesh-muralitharan-060a752b0/)
+- LinkedIn: [Geetesh M](https://www.linkedin.com/in/geeteshkm/)
 - LinkedIn: [Giricharan BV](https://www.linkedin.com/in/giri-charan-8001282a0/)
 
 ---
